@@ -1,0 +1,94 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace YoongDemo.Models
+{
+    public class Age
+    {
+        public int Years;
+        public int Months;
+        public int Days;
+
+        public Age(DateTime Bday)
+        {
+            this.Count(Bday);
+        }
+
+        public Age(DateTime Bday, DateTime Cday)
+        {
+            this.Count(Bday, Cday);
+        }
+
+        public Age Count(DateTime Bday)
+        {
+            return this.Count(Bday, DateTime.Today);
+        }
+
+        public Age Count(DateTime Bday, DateTime Cday)
+        {
+            if ((Cday.Year - Bday.Year) > 0 || (((Cday.Year - Bday.Year) == 0) && ((Bday.Month < Cday.Month) || ((Bday.Month == Cday.Month) && (Bday.Day <= Cday.Day)))))
+            {
+                int DaysInBdayMonth = DateTime.DaysInMonth(Bday.Year, Bday.Month);
+                int DaysRemain = Cday.Day + (DaysInBdayMonth - Bday.Day);
+
+                if (Cday.Month > Bday.Month)
+                {
+                    this.Years = Cday.Year - Bday.Year;
+                    this.Months = Cday.Month - (Bday.Month + 1) + Math.Abs(DaysRemain / DaysInBdayMonth);
+                    this.Days = (DaysRemain % DaysInBdayMonth + DaysInBdayMonth) % DaysInBdayMonth;
+                }
+                else if (Cday.Month == Bday.Month)
+                {
+                    if (Cday.Day >= Bday.Day)
+                    {
+                        this.Years = Cday.Year - Bday.Year;
+                        this.Months = 0;
+                        this.Days = Cday.Day - Bday.Day;
+                    }
+                    else
+                    {
+                        this.Years = (Cday.Year - 1) - Bday.Year;
+                        this.Months = 11;
+                        this.Days = DateTime.DaysInMonth(Bday.Year, Bday.Month) - (Bday.Day - Cday.Day);
+                    }
+                }
+                else
+                {
+                    this.Years = (Cday.Year - 1) - Bday.Year;
+                    this.Months = Cday.Month + (11 - Bday.Month) + Math.Abs(DaysRemain / DaysInBdayMonth);
+                    this.Days = (DaysRemain % DaysInBdayMonth + DaysInBdayMonth) % DaysInBdayMonth;
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Birthday date must be earlier than current date");
+            }
+            return this;
+        }
+        public string NextBirth(DateTime Bday, DateTime Cday)
+        {
+            DateTime next = Bday.AddYears(Cday.Year - Bday.Year);
+
+            if (next < Cday)
+            {
+                if (!DateTime.IsLeapYear(next.Year + 1))
+                { 
+                    this.Days = next.AddYears(1).Day;
+                    this.Months = next.AddYears(1).Month;
+                    this.Years = next.AddYears(1).Year;
+                    return this.Years + "-" + this.Months + "-" + this.Days;
+                }
+                else
+                    //next = new DateTime(next.Year + 1, Bday.Month, Bday.Day);
+                    this.Days = Bday.Day;
+                    this.Months = Bday.Month;
+                    this.Years = next.Year + 1;
+                    return this.Years + "-" + this.Months + "-" + this.Days;
+            }
+            //this.Days = (next - Cday).Days;
+            return "";
+        }
+    }
+}
